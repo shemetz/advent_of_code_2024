@@ -1,11 +1,12 @@
-from typing import List
+from typing import List, Set, Tuple
 
 with open("input.txt") as input_file:
     input_lines = input_file.readlines()
     input_lines = [line.strip('\n') for line in input_lines]
 
-rules = set()
-updates = []
+# e.g. { (34, 56), (56, 78), ... }
+rules: Set[Tuple[int, int]] = set({})
+updates: List[List[int]] = []
 is_updating = False
 for line in input_lines:
     if is_updating:
@@ -18,7 +19,7 @@ for line in input_lines:
 
 def is_valid_update(some_update: List[int]) -> bool:
     for idx1, id1 in enumerate(some_update):
-        for idx2, id2 in enumerate(some_update[idx1 + 1:]):
+        for id2 in some_update[idx1 + 1:]:
             if (id2, id1) in rules:
                 return False
     return True
