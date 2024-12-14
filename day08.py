@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 import itertools
 from typing import Dict, Set
@@ -31,15 +32,13 @@ print("Answer 1:", answer_1)  # 303
 have_antinodes: Set[Point] = set()
 for freq, antennae in antennae_by_freq.items():
     for antenna_1, antenna_2 in itertools.combinations(antennae, 2):
-        delta = antenna_2 - antenna_1
+        full_delta = antenna_2 - antenna_1
+        delta_gcd = math.gcd(int(full_delta.real), int(full_delta.imag))
+        delta = full_delta // delta_gcd
         antinode = antenna_1
-        while 0 <= antinode.real < width and 0 <= antinode.imag < height:
-            have_antinodes.add(antinode)
-            antinode += delta
-        antinode = antenna_1
-        delta = -delta
-        while 0 <= antinode.real < width and 0 <= antinode.imag < height:
-            have_antinodes.add(antinode)
-            antinode += delta
+        for delta in (delta, -delta):
+            while 0 <= antinode.real < width and 0 <= antinode.imag < height:
+                have_antinodes.add(antinode)
+                antinode += delta
 answer_2 = len(have_antinodes)
 print("Answer 2:", answer_2)  # 1045
