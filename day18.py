@@ -16,11 +16,11 @@ walls = set()
 def pathfind():
     # simple bfs
     visited = set()
-    queue = [(start_pos, 0)]
+    queue = [(start_pos, (start_pos,))]
     while queue:
-        pos, steps = queue.pop(0)
+        pos, path = queue.pop(0)
         if pos == end_pos:
-            return steps
+            return path
         if pos in visited:
             continue
         visited.add(pos)
@@ -30,18 +30,23 @@ def pathfind():
                 continue
             if new_pos in walls or new_pos in visited:
                 continue
-            queue.append((new_pos, steps + 1))
+            queue.append((new_pos, path + (new_pos,)))
     return None
 
 
+last_path = tuple()
 for t, line in enumerate(input_lines):
     xs, ys = re.findall(r'-?\d+', line)
     x, y = int(xs), int(ys)
-    walls.add(complex(x, y))
+    wall = complex(x, y)
+    walls.add(wall)
     if t == SIMULATED_NUM_FOR_PART_1 - 1:
-        answer_1 = pathfind()
+        last_path = pathfind()
+        answer_1 = len(last_path) - 1
         print("Answer 1", answer_1)  # 262
-    path_found = pathfind() is not None
-    if not path_found:
-        print("Answer 2", line)  # 22,20
-        break
+    if wall in last_path:  # only recalculate when a wall obstructs the previous path!
+        path = pathfind()
+        if path is None:
+            print("Answer 2", line)  # 22,20
+            break
+        last_path = path
