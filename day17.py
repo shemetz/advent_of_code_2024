@@ -167,12 +167,37 @@ def run_program_optimized_cached(initial_reg_a):
 # 0o7421115036621633 yesss!!!   but noooooo
 # -> 265061364605851 is too high :(
 
-# ...manual attempts continue...fine-tuning to get lowest...!
-for i in range(0, 0o1000):
-    inp = 0o0_001_115_036_621_633 + (i << 3*13)
-    attempt_output = run_program_optimized(inp)
-    print(format3(inp), format4(i), "->", attempt_output, ".")
-    if attempt_output == program_raw:
-        print("SUCCESS")
-        print("Answer 2:", inp)
-        break
+# # ...manual attempts continue...fine-tuning to get lowest...!
+# for i in range(0, 0o1000):
+#     inp = 0o0_001_115_036_621_633 + (i << 3*13)
+#     attempt_output = run_program_optimized(inp)
+#     print(format3(inp), format4(i), "->", attempt_output, ".")
+#     if attempt_output == program_raw:
+#         print("SUCCESS")
+#         print("Answer 2:", inp)
+#         break
+
+
+# just copying and altering a similar nd smarter answer from online:
+def step(reg_a):
+    reg_c = reg_a >> ((reg_a & 0b111) ^ 7)
+    reg_b = (reg_a & 0b111) ^ reg_c
+    return reg_b & 0b111
+
+
+def find(A, index):
+    if step(A) != program[index]:
+        return
+
+    if index == 0:
+        As.append(A)
+    else:
+        for B in range(8):
+            find(A * 8 + B, index - 1)
+
+
+As = []
+first_index = len(program) - 1
+for a in range(8):
+    find(a, first_index)
+print("Answer 2", min(As))  # 265061364597659
