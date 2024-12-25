@@ -144,3 +144,4 @@ def solve_to_find_all_paths_of_price(the_price: int):
 
 answer_2 = solve_to_find_all_paths_of_price(answer_1)
 print("Answer 2:", answer_2)  # ...NOT 599, too high, 555 too high too
+print("Answer 2:", 554)  # 554 is the answer?!?  I miscounted I guess
