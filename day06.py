@@ -38,6 +38,9 @@ print("Answer 1:", answer_1)  # 4559
 
 # part 2
 answer_2 = 0
+# memoization:  shortcuts, keeping track of only turning points
+memo: Dict[Tuple[complex, complex], Tuple[complex, complex]] = {}
+last_turn = (start, start_dir)
 for block_r in range(height):
     for block_c in range(width):
         block = block_r * 1j + block_c
@@ -50,11 +53,18 @@ for block_r in range(height):
         position = start
         direction = start_dir
         while 0 <= position.real < width and 0 <= position.imag < height:
+            if (position, direction) in memo and block.real != position.real and block.imag != position.imag:
+                # shortcut
+                position, direction = memo[(position, direction)]
+                continue
             next_position = position + direction
             if next_position in walls or next_position == block:
+                if next_position != block:
+                    memo[(position, direction)] = last_turn
                 # turn right
                 direction = direction * 1j
                 next_position = position + direction
+                last_turn = (next_position, direction)
             else:
                 position = next_position
                 visited_counts[position] += 1
