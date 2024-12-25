@@ -141,70 +141,121 @@ PADS_BY_INDEX = [KEYPAD_COORDS, DIRECTIONAL_PAD_COORDS]
 
 
 # ATTEMPT #2
+#
+#
+# @functools.lru_cache(maxsize=None)
+# def chart_one_step_options(pad_idx: int, start: Coord, end: Coord) -> Tuple[str, ...]:
+#     if start == end:
+#         return ("A",)
+#     sx, sy = start
+#     ex, ey = end
+#     dx, dy = ex - sx, ey - sy
+#     horizontal_moves = ">" * dx if dx > 0 else "<" * (dx * -1) if dx < 0 else ""
+#     vertical_moves = "v" * dy if dy > 0 else "^" * (dy * -1) if dy < 0 else ""
+#     h_v_sequence = horizontal_moves + vertical_moves + "A"
+#     v_h_sequence = vertical_moves + horizontal_moves + "A"
+#     if h_v_sequence == v_h_sequence:
+#         return (h_v_sequence,)  # just a single direction
+#     # drop sequence with deadly emptiness
+#     if pad_idx == DIR_PAD_IDX and sx == 0 and ey == 0:
+#         return (h_v_sequence,)  # >^
+#     if pad_idx == DIR_PAD_IDX and sy == 0 and ex == 0:
+#         return (v_h_sequence,)  # v<
+#     if pad_idx == KEY_PAD_IDX and sx == 0 and ey == 3:
+#         return (h_v_sequence,)  # >v
+#     if pad_idx == KEY_PAD_IDX and sy == 3 and ex == 0:
+#         return (v_h_sequence,)  # ^<
+#     return h_v_sequence, v_h_sequence
+#
+#
+# @functools.lru_cache(maxsize=None)
+# def chart_meta_sequence_options(pad_idx: int, target_sequence: str) -> Tuple[str, ...]:
+#     pad = PADS_BY_INDEX[pad_idx]
+#     options = [""]
+#     curr_coords = pad["A"]
+#     for char in target_sequence:
+#         target_coords = pad[char]
+#         sequences = chart_one_step_options(pad_idx, curr_coords, target_coords)
+#         if len(sequences) == 1:
+#             options = [option + sequences[0] for option in options]
+#         else:  # len = 2
+#             options = [option + sequences[0] for option in options] + [option + sequences[1] for option in options]
+#         curr_coords = target_coords
+#     return tuple(options)
+#
+#
+# def solve_and_calc_complexity(dcode: str, inbetween_steps: int):
+#     options = chart_meta_sequence_options(KEY_PAD_IDX, dcode)
+#     for step in range(inbetween_steps):
+#         next_options = []
+#         for option in options:
+#             sub_options = chart_meta_sequence_options(DIR_PAD_IDX, option)
+#             next_options.extend(sub_options)
+#         shortest_option_length = min(len(option) for option in next_options)
+#         options = [option for option in next_options if len(option) == shortest_option_length]
+#     # select shortest option
+#     shortest_option = min(options, key=len)
+#     number_in_door_code = int(dcode[:-1])
+#     return len(shortest_option) * number_in_door_code
+#
+# answer_1 = 0
+# answer_2 = 0
+# for line in input_lines:
+#     answer_1 += solve_and_calc_complexity(line, 2)
+#     answer_2 += solve_and_calc_complexity(line, 25)
+#
+#
+#
+# print("Answer 1:", answer_1)  # 215374
 
 
-@functools.lru_cache(maxsize=None)
-def chart_one_step_options(pad_idx: int, start: Coord, end: Coord) -> Tuple[str, ...]:
-    if start == end:
-        return ("A",)
-    sx, sy = start
-    ex, ey = end
-    dx, dy = ex - sx, ey - sy
-    horizontal_moves = ">" * dx if dx > 0 else "<" * (dx * -1) if dx < 0 else ""
-    vertical_moves = "v" * dy if dy > 0 else "^" * (dy * -1) if dy < 0 else ""
-    h_v_sequence = horizontal_moves + vertical_moves + "A"
-    v_h_sequence = vertical_moves + horizontal_moves + "A"
-    if h_v_sequence == v_h_sequence:
-        return (h_v_sequence,)  # just a single direction
-    # drop sequence with deadly emptiness
-    if pad_idx == DIR_PAD_IDX and sx == 0 and ey == 0:
-        return (h_v_sequence,)  # >^
-    if pad_idx == DIR_PAD_IDX and sy == 0 and ex == 0:
-        return (v_h_sequence,)  # v<
-    if pad_idx == KEY_PAD_IDX and sx == 0 and ey == 3:
-        return (h_v_sequence,)  # >v
-    if pad_idx == KEY_PAD_IDX and sy == 3 and ex == 0:
-        return (v_h_sequence,)  # ^<
-    return h_v_sequence, v_h_sequence
+# ATTEMPT #3 (cheating and copying someone else's solution and then rewriting bits)
 
 
-@functools.lru_cache(maxsize=None)
-def chart_meta_sequence_options(pad_idx: int, target_sequence: str) -> Tuple[str, ...]:
-    pad = PADS_BY_INDEX[pad_idx]
-    options = [""]
-    curr_coords = pad["A"]
-    for char in target_sequence:
-        target_coords = pad[char]
-        sequences = chart_one_step_options(pad_idx, curr_coords, target_coords)
-        if len(sequences) == 1:
-            options = [option + sequences[0] for option in options]
-        else:  # len = 2
-            options = [option + sequences[0] for option in options] + [option + sequences[1] for option in options]
-        curr_coords = target_coords
-    return tuple(options)
+key_pad = [
+    ["7", "8", "9"],
+    ["4", "5", "6"],
+    ["1", "2", "3"],
+    [" ", "0", "A"],
+]
+direc_pad = [
+    [" ", "^", "A"],
+    ["<", "v", ">"],
+]
+HOLE = " "
 
 
-def solve_and_calc_complexity(dcode: str, inbetween_steps: int):
-    options = chart_meta_sequence_options(KEY_PAD_IDX, dcode)
-    for step in range(inbetween_steps):
-        next_options = []
-        for option in options:
-            sub_options = chart_meta_sequence_options(DIR_PAD_IDX, option)
-            next_options.extend(sub_options)
-        shortest_option_length = min(len(option) for option in next_options)
-        options = [option for option in next_options if len(option) == shortest_option_length]
-    # select shortest option
-    shortest_option = min(options, key=len)
-    number_in_door_code = int(dcode[:-1])
-    return len(shortest_option) * number_in_door_code
+def path(pad: List[List[str]], start: str, end: str):
+    # start x,y and end x,y coordinates
+    sx, sy = next((x, y) for y, r in enumerate(pad) for x, c in enumerate(r) if c == start)
+    ex, ey = next((x, y) for y, r in enumerate(pad) for x, c in enumerate(r) if c == end)
 
-answer_1 = 0
+    def generate_path_options(x, y, s):
+        # to avoid going e.g. "^>^" (prioritizing "^^>" or ">^^") I add this:
+        used_already = s.replace(s[-1], "") if s else ""  # e.g. "^^>" -> "^",
+        if (x, y) == (ex, ey):            yield s + 'A'
+        if ex < x and pad[y][x - 1] != HOLE and '<' not in used_already:
+            yield from generate_path_options(x - 1, y, s + '<')
+        if ey < y and pad[y - 1][x] != HOLE and '^' not in used_already:
+            yield from generate_path_options(x, y - 1, s + '^')
+        if ey > y and pad[y + 1][x] != HOLE and 'v' not in used_already:
+            yield from generate_path_options(x, y + 1, s + 'v')
+        if ex > x and pad[y][x + 1] != HOLE and '>' not in used_already:
+            yield from generate_path_options(x + 1, y, s + '>')
+
+    return next(generate_path_options(sx, sy, ""))
+
+
+@functools.cache
+def solve(seq: str, level: int):
+    if level > 25: return len(seq)
+    pad = direc_pad if level > 0 else key_pad
+    return sum(solve(path(pad, f, t), level + 1) for f, t in zip('A' + seq, seq))
+
+
 answer_2 = 0
 for line in input_lines:
-    answer_1 += solve_and_calc_complexity(line, 2)
-    answer_2 += solve_and_calc_complexity(line, 25)
-
-
-
-print("Answer 1:", answer_1)  # 215374
-print("Answer 2:", answer_2)  #
+    shortest_seq_length = solve(line, 0)
+    numeric_part = int(line[:3])
+    answer_2 += shortest_seq_length * numeric_part
+print("Answer 2:", answer_2)  # 260586897262600
